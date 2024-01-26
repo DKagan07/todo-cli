@@ -1,5 +1,6 @@
 use std::fs::OpenOptions;
 use std::io::{self, BufReader, BufWriter, Read, Write};
+// use std::os::unix;
 use std::{env, fs, process};
 use vibrance::style;
 
@@ -9,6 +10,7 @@ pub struct Todo {
 }
 
 impl Todo {
+    // new Creates a new todo list
     pub fn new() -> Result<Todo, String> {
         // checking for path
         let todo_path: String = match env::var("TODO_PATH") {
@@ -40,7 +42,7 @@ impl Todo {
         return Ok(Todo { todo, todo_path });
     }
 
-    // Now make CRUD things
+    // list Lists all of the items in the todo list
     pub fn list(&self) {
         println!("in list!");
         let stdout = io::stdout();
@@ -56,14 +58,19 @@ impl Todo {
             let is_completed = &item[..4];
             let i = item.to_string();
 
-            if is_completed.contains("*") {
-                result = format!("{} {}", num, style::strikethrough(i));
+            let res = if is_completed.contains("*") {
+                let test = format!("{} {}", num, style::strikethrough(i));
+                test
             } else {
-                result = format!("{} {}", num, i);
-            }
+                let test = format!("{} {}", num, i);
+                test
+            };
+            result.push_str(&format!("{res}\n"));
         }
         buf.write_all(result.as_bytes()).unwrap()
     }
+
+    // add Adds an item to the todo list
     pub fn add(&self, args: &[String]) {
         println!("in add!");
         // Verifying arg length,
@@ -80,7 +87,16 @@ impl Todo {
             .expect("Could not open todo file");
 
         let mut buf = BufWriter::new(todo_file);
+        let content = fs::read_to_string(&self.todo_path).unwrap();
         for arg in args {
+            println!("{}", arg);
+
+            // Checks to see if the item is already in the list, if it is, then don't add it
+            if content.contains(arg) {
+                eprintln!("Item already in your list! You haven't done it yet. Go do it.");
+                break;
+            }
+
             if arg.trim().is_empty() {
                 continue;
             }
@@ -92,8 +108,44 @@ impl Todo {
             buf.write_all(line.as_bytes()).unwrap()
         }
     }
-    pub fn complete() {
-        println!("in complete!")
+
+    // complete Completes the task, causing a strikethrough to go through the item to denote this
+    pub fn complete(&self, args: &[String]) {
+        println!("in complete!");
+
+        // I guess the idea is to add a '*' to denote that it's done, as it will be struck through
+        // in the list fn
+
+        println!("args: {:?}", &args);
+
+        let stdout = io::stdout();
+
+        let mut buf = BufWriter::new(stdout);
+        let mut result = String::new();
+        //
+        // Reading file
+        let contents = fs::read_to_string(&self.todo_path).unwrap();
+
+        // Making sure all tasks are in the todo list, if not, exit with error
+        let mut tasks = Vec::new();
+        for arg in args {
+            if contents.contains(arg) {
+                tasks.push(arg);
+            }
+        }
+        if tasks.len() != args.len() {
+            eprint!("Some tasks aren't in your todo list, please fix");
+            process::exit(1);
+        }
+        println!("tasks: {:?}", &tasks);
+
+        // Now, have to loop through the lines and * the ones that are in the tasks vec
+        // TODO: THIS vvv
+        for (num, item) in contents.lines().enumerate() {
+            let formal_num = num + 1;
+            let item = &item[4..];
+            println!("formal_num: {}\nitem: {}", formal_num, item);
+        }
     }
     pub fn delete() {
         println!("in delete!")

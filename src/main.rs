@@ -19,6 +19,7 @@ fn main() {
         match &first_arg[..] {
             "list" => todo.list(),
             "add" => todo.add(&args[3..]),
+            "complete" => todo.complete(&args[3..]),
             _ => println!("blablabla"),
         }
     } else {
