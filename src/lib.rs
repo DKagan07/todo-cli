@@ -54,16 +54,13 @@ impl Todo {
         let contents = fs::read_to_string(&self.todo_path).unwrap();
         for (num, item) in contents.lines().enumerate() {
             let num = num + 1;
-            let item = &item[4..];
+            let task = &item[4..];
             let is_completed = &item[..4];
-            let i = item.to_string();
 
             let res = if is_completed.contains("*") {
-                let test = format!("{} {}", num, style::strikethrough(i));
-                test
+                format!("{} {}", num, style::strikethrough(task))
             } else {
-                let test = format!("{} {}", num, i);
-                test
+                format!("{} {}", num, task)
             };
             result.push_str(&format!("{res}\n"));
         }
@@ -111,22 +108,19 @@ impl Todo {
 
     // complete Completes the task, causing a strikethrough to go through the item to denote this
     pub fn complete(&self, args: &[String]) {
-        println!("in complete!");
-
-        // I guess the idea is to add a '*' to denote that it's done, as it will be struck through
-        // in the list fn
-
-        println!("args: {:?}", &args);
-
-        let stdout = io::stdout();
-
-        let mut buf = BufWriter::new(stdout);
         let mut result = String::new();
-        //
+
         // Reading file
+        let todo_file = OpenOptions::new()
+            .write(true)
+            .read(true)
+            .open(&self.todo_path)
+            .expect("Could not open todo file");
+        let mut buf = BufWriter::new(todo_file);
         let contents = fs::read_to_string(&self.todo_path).unwrap();
 
         // Making sure all tasks are in the todo list, if not, exit with error
+        // Also validates the tasks are already in the todo-list
         let mut tasks = Vec::new();
         for arg in args {
             if contents.contains(arg) {
@@ -137,16 +131,23 @@ impl Todo {
             eprint!("Some tasks aren't in your todo list, please fix");
             process::exit(1);
         }
-        println!("tasks: {:?}", &tasks);
 
         // Now, have to loop through the lines and * the ones that are in the tasks vec
-        // TODO: THIS vvv
-        for (num, item) in contents.lines().enumerate() {
-            let formal_num = num + 1;
-            let item = &item[4..];
-            println!("formal_num: {}\nitem: {}", formal_num, item);
+        for (_, item) in contents.lines().enumerate() {
+            let task = &item[4..];
+            // let checkbox = &item[..3];
+
+            let todo_task = if tasks.contains(&&task.to_string()) {
+                let check = "[*]";
+                format!("{} {}\n", check, task)
+            } else {
+                format!("{}\n", item.to_string())
+            };
+            result.push_str(&todo_task);
         }
+        buf.write_all(result.as_bytes()).unwrap()
     }
+
     pub fn delete() {
         println!("in delete!")
     }
