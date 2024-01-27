@@ -20,6 +20,7 @@ fn main() {
             "list" => todo.list(),
             "add" => todo.add(&args[3..]),
             "complete" => todo.complete(&args[3..]),
+            "delete" => todo.delete(&args[3..]),
             _ => println!("blablabla"),
         }
     } else {

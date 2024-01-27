@@ -1,6 +1,5 @@
 use std::fs::OpenOptions;
 use std::io::{self, BufReader, BufWriter, Read, Write};
-// use std::os::unix;
 use std::{env, fs, process};
 use vibrance::style;
 
@@ -148,9 +147,37 @@ impl Todo {
         buf.write_all(result.as_bytes()).unwrap()
     }
 
-    pub fn delete() {
-        println!("in delete!")
+    // delete Deletes an entry in the todo file
+    pub fn delete(&self, args: &[String]) {
+        let mut result = String::new();
+
+        // Reading file
+        // This is an unoptimal way to delete an item at scale because we're just essentially
+        // re-writing the whole file without the element(s) we wanted to delete
+        let contents = fs::read_to_string(&self.todo_path).unwrap();
+        let todo_file = OpenOptions::new()
+            .write(true)
+            .read(true)
+            .truncate(true)
+            .open(&self.todo_path)
+            .expect("Could not open todo file");
+        let mut buf = BufWriter::new(todo_file);
+
+        for (_, item) in contents.lines().enumerate() {
+            let task = &item[4..];
+            if args.contains(&task.to_string()) {
+                println!("item to be deleted: {}", task);
+                continue;
+            } else {
+                println!("item to keep around: {}", task);
+                result.push_str(format!("{}\n", item).as_str())
+            };
+        }
+        println!("result.trim(): {}.", result.trim());
+
+        buf.write_all(result.as_bytes()).unwrap()
     }
+
     pub fn update() {
         println!("in update!")
     }
