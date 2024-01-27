@@ -43,7 +43,6 @@ impl Todo {
 
     // list Lists all of the items in the todo list
     pub fn list(&self) {
-        println!("in list!");
         let stdout = io::stdout();
 
         let mut buf = BufWriter::new(stdout);
@@ -68,7 +67,6 @@ impl Todo {
 
     // add Adds an item to the todo list
     pub fn add(&self, args: &[String]) {
-        println!("in add!");
         // Verifying arg length,
         if args.len() < 1 {
             eprintln!("Todo add takes at least 1 argument");
@@ -85,8 +83,6 @@ impl Todo {
         let mut buf = BufWriter::new(todo_file);
         let content = fs::read_to_string(&self.todo_path).unwrap();
         for arg in args {
-            println!("{}", arg);
-
             // Checks to see if the item is already in the list, if it is, then don't add it
             if content.contains(arg) {
                 eprintln!("Item already in your list! You haven't done it yet. Go do it.");
@@ -100,7 +96,6 @@ impl Todo {
             // this is how the todo tasks are defined
             let line = format!("[ ] {}\n", arg);
 
-            println!("{}", line);
             buf.write_all(line.as_bytes()).unwrap()
         }
     }
@@ -173,12 +168,48 @@ impl Todo {
                 result.push_str(format!("{}\n", item).as_str())
             };
         }
-        println!("result.trim(): {}.", result.trim());
 
         buf.write_all(result.as_bytes()).unwrap()
     }
 
-    pub fn update() {
-        println!("in update!")
+    pub fn update(&self, what_to_change: &String, change_to: &String) {
+        let mut result = String::new();
+
+        // Reading file
+        let contents = fs::read_to_string(&self.todo_path).unwrap();
+        let todo_file = OpenOptions::new()
+            .write(true)
+            .read(true)
+            .truncate(true)
+            .open(&self.todo_path)
+            .expect("Could not open todo file");
+        let mut buf = BufWriter::new(todo_file);
+
+        if !contents.contains(what_to_change) {
+            eprintln!(
+                "Item that you want to change ({}) does not exist in your todo list",
+                what_to_change
+            );
+            process::exit(1);
+        };
+        for (_, item) in contents.lines().enumerate() {
+            let task = &item[4..];
+            let checkbox = &item[..3];
+            let new_task = if task == what_to_change {
+                if checkbox.contains("*") {
+                    format!("{} {}\n", checkbox, change_to)
+                } else {
+                    format!("{} {}\n", checkbox, change_to)
+                }
+            } else {
+                format!("{}\n", item)
+            };
+            result.push_str(&new_task);
+        }
+        buf.write_all(result.as_bytes()).unwrap()
+    }
+
+    pub fn uncomplete(&self, args: &[String]) {
+        println!("In uncomplete!")
     }
 }

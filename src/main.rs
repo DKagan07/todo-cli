@@ -13,7 +13,6 @@ fn main() {
     // args[1] is the first argument passed in (todo), etc...
     println!("args: {:?}", args);
     if args.len() > 1 {
-        println!("arg: {}", args[2]);
         // Because of listed above, we have to match on args[1]
         let first_arg = &args[2];
         match &first_arg[..] {
@@ -21,6 +20,17 @@ fn main() {
             "add" => todo.add(&args[3..]),
             "complete" => todo.complete(&args[3..]),
             "delete" => todo.delete(&args[3..]),
+            "update" => {
+                let min_size = 5;
+                if &args.len() < &min_size {
+                    eprintln!("Not enough arguments");
+                    eprintln!(
+                        "Ex. todo update <item to make the change to> <what to change the item to>"
+                    );
+                    process::exit(3);
+                }
+                todo.update(&args[3], &args[4])
+            }
             _ => println!("blablabla"),
         }
     } else {
