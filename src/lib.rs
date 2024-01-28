@@ -210,6 +210,37 @@ impl Todo {
     }
 
     pub fn uncomplete(&self, args: &[String]) {
-        println!("In uncomplete!")
+        // Reading file
+        let mut result = String::new();
+        let contents = fs::read_to_string(&self.todo_path).unwrap();
+        let todo_file = OpenOptions::new()
+            .write(true)
+            .read(true)
+            .truncate(true)
+            .open(&self.todo_path)
+            .expect("Could not open todo file");
+        let mut buf = BufWriter::new(todo_file);
+
+        for arg in args {
+            if contents.contains(arg) {
+                eprintln!("Item: {} not in todo-list, cannot uncomplete it!", arg);
+                process::exit(2);
+            };
+        }
+
+        for (_, item) in contents.lines().enumerate() {
+            let task = String::from(&item[4..]);
+            let checkbox = &item[..3];
+
+            let restored_task = if checkbox.contains("*") && args.contains(&task) {
+                format!("[ ] {}\n", &task)
+            } else {
+                String::from(item)
+            };
+            println!("restored_task: {}", restored_task);
+            result.push_str(&restored_task);
+        }
+
+        // buf.write(result.as_bytes()).unwrap();
     }
 }
