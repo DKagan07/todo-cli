@@ -161,10 +161,8 @@ impl Todo {
         for (_, item) in contents.lines().enumerate() {
             let task = &item[4..];
             if args.contains(&task.to_string()) {
-                println!("item to be deleted: {}", task);
                 continue;
             } else {
-                println!("item to keep around: {}", task);
                 result.push_str(format!("{}\n", item).as_str())
             };
         }
@@ -209,8 +207,12 @@ impl Todo {
         buf.write_all(result.as_bytes()).unwrap()
     }
 
+    // uncomplete Removes the strikethrough of a task that was previously marked as complete
     pub fn uncomplete(&self, args: &[String]) {
         // Reading file
+        let stdout = io::stdout();
+        let mut stdout_buf = BufWriter::new(stdout);
+
         let mut result = String::new();
         let contents = fs::read_to_string(&self.todo_path).unwrap();
         let todo_file = OpenOptions::new()
@@ -222,8 +224,8 @@ impl Todo {
         let mut buf = BufWriter::new(todo_file);
 
         for arg in args {
-            if contents.contains(arg) {
-                eprintln!("Item: {} not in todo-list, cannot uncomplete it!", arg);
+            if !contents.contains(arg) {
+                eprintln!("Item '{}' not in todo-list, cannot uncomplete it!", arg);
                 process::exit(2);
             };
         }
@@ -234,13 +236,32 @@ impl Todo {
 
             let restored_task = if checkbox.contains("*") && args.contains(&task) {
                 format!("[ ] {}\n", &task)
+            } else if args.contains(&task) {
+                stdout_buf
+                    .write("Item not previously completed, so no errors, but beware!".as_bytes())
+                    .unwrap();
+                format!("{}\n", item)
             } else {
-                String::from(item)
+                format!("{}\n", item)
             };
-            println!("restored_task: {}", restored_task);
             result.push_str(&restored_task);
         }
 
-        // buf.write(result.as_bytes()).unwrap();
+        buf.write(result.as_bytes()).unwrap();
+    }
+
+    pub fn clear(&self) {
+        let stdout = io::stdout();
+        let mut buf = BufWriter::new(stdout);
+
+        // This function clears the file because of the 'truncate' option
+        let _ = OpenOptions::new()
+            .write(true)
+            .read(true)
+            .truncate(true)
+            .open(&self.todo_path)
+            .expect("Could not open todo file");
+
+        buf.write_all("Cleared todo file".as_bytes()).unwrap()
     }
 }

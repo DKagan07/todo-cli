@@ -11,7 +11,6 @@ fn main() {
 
     // args[0] is the name of the program
     // args[1] is the first argument passed in (todo), etc...
-    println!("args: {:?}", args);
     if args.len() > 1 {
         // Because of listed above, we have to match on args[1]
         let first_arg = &args[2];
@@ -31,6 +30,8 @@ fn main() {
                 }
                 todo.update(&args[3], &args[4])
             }
+            "uncomplete" => todo.uncomplete(&args[3..]),
+            "clear" => todo.clear(),
             _ => println!("blablabla"),
         }
     } else {
