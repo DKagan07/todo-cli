@@ -30,7 +30,7 @@ fn main() {
             }
             "uncomplete" => todo.uncomplete(&args[2..]),
             "clear" => todo.clear(),
-            _ => println!("Not a valid argument, here is some help! {}", TODO_HELP),
+            _ => println!("Not a valid argument, {}", TODO_HELP),
         }
     } else {
         eprintln!("{}", TODO_HELP)
