@@ -255,6 +255,7 @@ impl Todo {
         let mut buf = BufWriter::new(stdout);
 
         // This function clears the file because of the 'truncate' option
+        // Probably not correct, but tuncate makes it work
         let _ = OpenOptions::new()
             .write(true)
             .read(true)
