@@ -1,7 +1,9 @@
 Hello everyone, this is just a very small todo app written in Rust.
 
 There are limited thing you can do with this simple todo list.
+
 You can:
+
     * add -- multiple items
     * complete -- muiltiple items (with a satisfying strikethrough)
     * delete -- multiple items
