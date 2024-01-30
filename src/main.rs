@@ -1,5 +1,5 @@
 use std::{env, process};
-use todo_cli::Todo;
+use todo::Todo;
 
 fn main() {
     let todo = Todo::new().unwrap_or_else(|err| {
@@ -39,11 +39,11 @@ fn main() {
 
 const TODO_HELP: &str = "
 I see you need some help. Here are how to use the todo app!
-todo-cli list                       / lists all items in the list
-todo-cli add <args>                 / adds item(s) to the list
-todo-cli complete <args>            / completes item(s). This appears as a strikethrough
-todo-cli delete <args>              / deletes item(s) in the list
-todo-cli update <old> <new>         / changes the item from <old> to <new> in the list
-todo-cli uncomplete <args>          / if an item was struck-through, it returns it to its normal state
-todo-cli clear                      / completely clears the todo file where items are stored
+todo list                       / lists all items in the list
+todo add <args>                 / adds item(s) to the list
+todo complete <args>            / completes item(s). This appears as a strikethrough
+todo delete <args>              / deletes item(s) in the list
+todo update <old> <new>         / changes the item from <old> to <new> in the list
+todo uncomplete <args>          / if an item was struck-through, it returns it to its normal state
+todo clear                      / completely clears the todo file where items are stored
 ";
